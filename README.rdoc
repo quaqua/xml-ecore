@@ -1,10 +1,36 @@
-= ecore
+ecore is a content repository implementation in ruby. It's main purpose 
+is to replace rails' ActiveRecord mysql mapper in favor of a pseudo 
+hierarchical structure stored in xml files.
+ 
+Every content is a node in the content repository and can collect other
+nodes again.
 
-Environmental-friendly content repository
+ecore is NOT made for large datasets, as it's performance decreases the
+more the repository grows, but staying under 1.000.000 entries in production
+mode, ecore can be a very handy tool.
 
+==== dependencies
+
+ * nokogiri
+ * active_model
+
+==== features
+
+ * compatible to ActiveRecord (uses ActiveModel methods)
+ * access handling (you won't get a node, if you don't have access on it)
+ * very primitive mutex
+ * restore deleted nodes
+ * compatible with jruby (with nokogiri-java)
+
+==== next goals
+
+ * journaling (version control for nodes)
+ 
 == Installation
 
 Download this package and run:
+
+  gem build ecore.gemspec
 
   gem install ecore
   
@@ -43,6 +69,4 @@ datatypes will be converted from strings (e.g. when passed from a form) back to 
     before :save do
       # things to do before save
     end
-  end
-  
-
+  end 
