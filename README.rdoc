@@ -158,4 +158,7 @@ the privileges for the current node holder will be returned
       # things to do before save
     end
   end
-    
+
+==== bugs, features, patches
+
+please feel free to contact me at quaqua@tastenwerk.com
