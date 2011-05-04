@@ -1,30 +1,70 @@
 ecore is a content repository implementation in ruby. It's main purpose 
-is to replace rails' ActiveRecord mysql mapper in favor of a pseudo 
+is to replace RubyOnRails' ActiveRecord mysql mapper in favor of a pseudo 
 hierarchical structure stored in xml files.
- 
-Every content is a node in the content repository and can collect other
-nodes again.
 
-ecore is NOT made for large datasets, as it's performance decreases the
-more the repository grows, but staying under 1.000.000 entries in production
-mode, ecore can be a very handy tool.
+It's dependencies are <tt>nokogiri</tt>, <tt>activesupport</tt> and <tt>activemodel</tt>
+(both are just used for ActiveRecord compatibility.
 
-==== dependencies
+ecore can be used just like ActiveRecord::Base
 
-* nokogiri
-* active_model
+example:
 
-==== features
+  MyTask < Ecore::Node
+    string  :name, :required => true # the name attribute is already defined in Ecore::Node
+    string  :note, :required => true
+    boolean :status
+    
+    before :create, lambda{ status = 'open' }
+    after :save, :do_something_else
+  end
 
-* compatible to ActiveRecord (uses ActiveModel methods)
-* access handling (you won't get a node, if you don't have access on it)
-* very primitive mutex
-* restore deleted nodes
-* compatible with jruby (with nokogiri-java)
+In order to work with nodes, you need an valid session
 
-==== next goals
+  session = Ecore::Session.new(:name => 'myname', :password => 'mypassword')
+  
+Now, you can create a node by (active_record like syntax):
 
-* journaling (version control for nodes)
+  mytask = MyTask.new(:name => 'call john', :note => '02 36 092 02')
+  puts "saved." if mynode.save(session)
+  
+or
+
+  mynode = Ecore::Node.create(session, :name => 'plain node for john')
+
+You can lookup the task by either looking up within "MyTask"-scope:
+
+  MyTask.find(session, :name.contains => 'john')
+  
+According to the above examples, this will only return mytask node named 
+'call john'.
+
+By using the Ecore::Node lookup scope, you will find any node type matching the
+filter:
+
+  Ecore::Node.find(session, :name.contains => 'john')
+  
+This shoud also return 'plain node for john'
+
+You can update a node by well-rails-known update_attributes method:
+
+  Ecore::Node.find(session, :id => params[:id]).update_attributes(params[:mytask])
+  
+For more details, refer to the rdoc.
+  
+==== What ecore can and what it can't
+
+ecore uses xml files and manages them via nokogiri. Therefore, it's performance will
+decrease the larger the files get. If you plan to store millions of nodes, ecore will
+most likely NOT be your choice.
+
+You can benefit from an almost fully implemented content repository which 
+is 100% compatible with ActiveRecord,
+implements access handling (you won't get a node, if you don't have access on it)
+can keep and restore deleted nodes
+is compatible with JRuby (via nokogiri-java)
+can subclass nodes (multiple times) which will inherit the predecessor's attributes
+can label nodes with other nodes (this causes a pseudo hierarchical behavior
+audits any changes
  
 == Installation
 
@@ -36,28 +76,76 @@ Download this package and run:
   
 from the directory where you downloaded ecore to.
 
-== Using ecore
+== Using ecore in Rails
 
 In your application init code add:
 
-  Ecore::Repository.new
+  Ecore::Repository.new :repos_path => 'db/repos'
   
-Additional options, like :repos_path, :logfile, :loglevel can be given.
-
-== Subclassing from Ecore::Node
-
-To create a new model, sublcass your model from Ecore::Node class
-
-  MyNode < Ecore::Node
-    string  :title
-    integer :status
-  end
+Additional options, like :logfile, :loglevel can be given.
   
 === Datatypes
 
-available datatypes are <tt>string,integer,float,boolean,time</tt>
+Only attributes defined via their datatype identifier will be stored to 
+the content repository (as ActiveRecord is doing with db migrations)
+
+available datatypes are <tt>string, integer, float, boolean, time</tt>
 
 datatypes will be converted from strings (e.g. when passed from a form) back to those datatypes.
+
+=== Labeling and Hierarchy
+
+Ecore has a label implementation, which allows nodes to be associated with other nodes. To keep
+compatitibility to a B-Tree Hierarchy, the primary label is the direct parent (in B-Tree structure).
+In ecore, other labels can be used, to link the node to other (parent) nodes, which in turn will
+list that node as it's subnode
+
+  node.add_label( parent_node )
+  node.save
+
+links node to parent_node.
+
+  parent_node.subnodes
+  
+will return an array containing node as parent_node's subnode
+
+  node.labels
+  or
+  node.primary_label
+  
+will return parent_node as node's parent
+
+=== Permissions
+
+A node stores permissions and will lookup group, everybody, anybody or label permissions until anything matches
+
+==== Sharing / Unsharing a node with a user
+
+  node.share( user, 'rw' )
+  node.save
+  
+shares a node with the given user
+
+  node.unshare( user )
+  node.save
+  
+unshares the node
+
+==== Effective ACL
+
+to see the current node's effective acls, a user can call the <tt>effective_acl</tt> method
+
+  node.effective_acl[user.id]
+  
+will return ACE (Access Control Entry) for given user (if any)
+
+  node.can_write?(user)
+  
+will return true/false if given user has write access on the current node
+
+If you call .can_read?, .can_write?, .can_share?, .can_delete? method without passing a user,
+the privileges for the current node holder will be returned
+  
 
 === Hooks
 
@@ -69,4 +157,5 @@ datatypes will be converted from strings (e.g. when passed from a form) back to 
     before :save do
       # things to do before save
     end
-  end 
+  end
+    
