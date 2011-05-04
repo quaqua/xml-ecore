@@ -11,20 +11,20 @@ mode, ecore can be a very handy tool.
 
 ==== dependencies
 
- * nokogiri
- * active_model
+* nokogiri
+* active_model
 
 ==== features
 
- * compatible to ActiveRecord (uses ActiveModel methods)
- * access handling (you won't get a node, if you don't have access on it)
- * very primitive mutex
- * restore deleted nodes
- * compatible with jruby (with nokogiri-java)
+* compatible to ActiveRecord (uses ActiveModel methods)
+* access handling (you won't get a node, if you don't have access on it)
+* very primitive mutex
+* restore deleted nodes
+* compatible with jruby (with nokogiri-java)
 
 ==== next goals
 
- * journaling (version control for nodes)
+* journaling (version control for nodes)
  
 == Installation
 
