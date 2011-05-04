@@ -17,7 +17,8 @@ module Ecore
       end
       
       def log(operation, node)
-        str = "#{DELIMITER}#{operation}"
+        str = "#{DELIMITER}#{Time.now}"
+        str << "#{DELIMITER}#{operation}"
         str << "#{DELIMITER}#{Time.now.to_f}"
         str << "#{DELIMITER}#{node.class.name}"
         str << "#{DELIMITER}#{node.name}"
@@ -36,13 +37,13 @@ module Ecore
         IO.readlines(@@logfile)[(-1 * num)..-1].inject(Array.new) do |arr, line|
           if line.include?(DELIMITER)
             splitline = line.split(DELIMITER)
-            tmp_hash = {:operation => splitline[1],
-                        :time => Time.at(splitline[2].to_f), 
-                        :class_name => splitline[3],
-                        :name => splitline[4],
-                        :id => splitline[5]}
-            tmp_hash.merge!({ :user_name => splitline[6],
-                              :user_id => splitline[7]}) if splitline.size > 7
+            tmp_hash = {:operation => splitline[2],
+                        :time => Time.at(splitline[3].to_f), 
+                        :class_name => splitline[4],
+                        :name => splitline[5],
+                        :id => splitline[6]}
+            tmp_hash.merge!({ :user_name => splitline[7],
+                              :user_id => splitline[8]}) if splitline.size > 8
             arr << tmp_hash
           end
           arr
