@@ -1,0 +1,48 @@
+= ecore
+
+Environmental-friendly content repository
+
+== Installation
+
+Download this package and run:
+
+  gem install ecore
+  
+from the directory where you downloaded ecore to.
+
+== Using ecore
+
+In your application init code add:
+
+  Ecore::Repository.new
+  
+Additional options, like :repos_path, :logfile, :loglevel can be given.
+
+== Subclassing from Ecore::Node
+
+To create a new model, sublcass your model from Ecore::Node class
+
+  MyNode < Ecore::Node
+    string  :title
+    integer :status
+  end
+  
+=== Datatypes
+
+available datatypes are <tt>string,integer,float,boolean,time</tt>
+
+datatypes will be converted from strings (e.g. when passed from a form) back to those datatypes.
+
+=== Hooks
+
+  MyNode < Ecore::Node
+    before :create, :before_create_action
+  end
+  
+  MyNode < Ecore::Node
+    before :save do
+      # things to do before save
+    end
+  end
+  
+

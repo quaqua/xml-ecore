@@ -1,0 +1,36 @@
+2011-05-04 - Version 0.3.9
+  - Ecore::Auditing added. any node operation will be logged now
+
+2011-05-03 - Version 0.3.8
+  - NodeAsset bugfixed: not saving asset everytime a node is saved, if asset is unchanged. That caused assets
+    to have a changed mtime attribute, if anything was updated
+  - NodeAsset bugfixed: node.id is saved properly
+  - NodeAsset node method added, so an asset can return it's associated node
+  - User.everybody added
+  
+2011-04-28 - Version 0.3.7
+  - Node::Asset added. An asset can be used, to fix other information to a node, which doesn't need to be
+    found apart from within the node itself
+  - fixed hooks, attributes and validations, which were omitting classes between current class and Ecore::Node class.
+    it is now possible to subclass Ecore::Node as often as needed
+  - Mutex verifies, that a node is not written at by two processes at once
+  - Case insensitive searching
+    
+2011-04-27 - Version 0.3.6
+  - groups are kept in user object, not in groups object, so it is faster to get groups of a user (which happens more often)
+
+2011-04-26 - Version 0.3.5
+  - caching for much faster queries is keeping cache with Ecore::ENV[:max_cache_size] || 100
+  
+2011-04-23 - Version 0.3.4
+  - nokogiri stable did not succeed with libxml dependency in java.
+    moved to nokogiri 1.5.0.beta.4. worked
+  - bugfixes in acls and labels (fixing infinite loops)
+    
+2011-04-22 - Version 0.3.3
+  - moved from libxml-ruby to nokogiri (due to java / jruby compatibility)
+  - xml stores attributes as xml attributes now (Version 1.0 -> 1.1) in order to prepare changing queries from xpath to SAX-Parser querying method (much later)
+  
+MISSING UNTIL Version 1.0:
+  - full journaling (versioning nodes)
+  - auditing
