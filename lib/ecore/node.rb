@@ -121,25 +121,6 @@ module Ecore
       end
     end
     
-    # returns all nodes, this node is labeled with
-    def labels(attrs={:all => true})
-      @label_node_ids.split(',').inject(Array.new) do |res, n_id| 
-        node = Ecore::Node.find( @session, :id => n_id )
-        attrs.each_pair do |k,v|
-          res << node if (k == :all or (node.respond_to?(k) and node.send(k) == v)) and node and (!Ecore::ENV[:sessions] or node.can_read?)
-        end
-        res
-      end
-    end
-    
-    # for hierarchical compatibility, first node in labels will be used as 
-    # primary label, respectively as parent 
-    def primary_label
-      raise SecurityTransgression.new('no session given') if Ecore::ENV[:sessions] and @session.nil?
-      label = Ecore::Node.find( @session, :id => @label_node_ids.split(',').first )
-      label.is_a?(Ecore::Node) ? label : nil
-    end
-    
     # returns all nodes, labeld with this node
     def subnodes
       Ecore::Node.find( @session, :label_node_ids.contains => @id )

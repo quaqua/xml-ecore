@@ -24,4 +24,8 @@ module Ecore
 	class AlreadyLockedError < StandardError
 	end
 	
+	# raised if node is accessed but has never been saved to the database before
+	class NotSavedYetError < StandardError
+	end
+	
 end

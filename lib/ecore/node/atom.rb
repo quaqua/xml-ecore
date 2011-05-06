@@ -8,6 +8,7 @@ require 'node/types'
 require 'node/hooks'
 require 'node/array'
 require 'node/validations'
+require 'node/labels'
 require 'node/symbol'
 require 'node/xml_actions/atom_xml_actions'
 
@@ -34,6 +35,10 @@ module Ecore
     # Validations
     include Ecore::Validations::InstanceMethods
     extend Ecore::Validations::ClassMethods
+    
+    #Labels
+    include Ecore::Labels::InstanceMethods
+    extend Ecore::Labels::ClassMethods
     
     # Common XML Actions
     extend Ecore::AtomXMLActions::ClassMethods
@@ -100,24 +105,6 @@ module Ecore
       end
     end
     
-    # adds given node as a label. First node
-    # in labels array will be primary label
-    # force primary label by passing :primary_label
-    #   node.add_label(node_to_label_this_node_with, :primary_label)
-    def add_label( node, type=:default )
-      raise SecurityTransgression.new("not a node object") unless node.is_a?(Ecore::NodeAtom)
-      add_label_id(node.id, type)
-    end
-    
-    # removes given node as a label
-    def remove_label( node )
-      raise SecurityTransgression.new("not a node object") unless node.is_a?(Ecore::NodeAtom)
-      tmp_labels = self.label_node_ids.split(',')
-      tmp_labels.delete( node.id )
-      self.label_node_ids = tmp_labels.join(',')
-    end
-    
-    
     # deletes a node if privileges grant it
     # returns true if deletion was successful
     # deletes a node permanently if :permanently is given as option
@@ -144,19 +131,7 @@ module Ecore
     def restore
       restore_from_xml
     end
-        
-    private
-    
-    def add_label_id(node_id, type)
-      tmp_labels = self.label_node_ids.split(',')
-      tmp_labels.delete( node_id )
-      if type == :primary
-        tmp_labels.insert(0, node_id)
-      else
-        tmp_labels << node_id
-      end
-      self.label_node_ids = tmp_labels.join(',')
-    end
+
     
   end
 end

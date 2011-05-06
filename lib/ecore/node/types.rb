@@ -20,7 +20,7 @@ module Ecore
       def string(name,options={})
         generate_attr(name.to_sym, :string, options)
       end
-
+      
       # defines a text attribute
       # text :name, options
       def text(name,options={})
@@ -66,7 +66,7 @@ module Ecore
 
       def generate_attr(name, type, options)
         raise TypeError.new("options must be Hash not #{options.class}") unless options.is_a?(Hash)
-        self.attributes ||= [] unless self.attributes
+        self.attributes ||= []
         self.attributes << name unless self.attributes.include?(name)
         if options[:required]
           validates :presence, name
@@ -121,8 +121,7 @@ module Ecore
             }
         end
 
-        __send__(:define_method, "#{name}") { 
-          instance_variable_get("@#{name}") }
+        __send__(:define_method, "#{name}") { instance_variable_get("@#{name}") }
       end
 
     end # ClassMethods
