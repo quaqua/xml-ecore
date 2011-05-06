@@ -6,8 +6,8 @@ module Ecore
     
       # create scope with given :name
       # for given :class_name
-      def scope(name, klass_name)
-        plural = name.to_s + (name.to_s[-1,1] == "y" ? "ies" : "s")
+      def scope(name)
+        plural = name.to_s.pluralize
         __send__(:define_method, "add_#{name}") do |val|
           raise TypeError.new('not a Ecore::Node given') unless val.is_a?(Ecore::Node)
           eval("val.add_#{self.class.name.underscore}(self)")
@@ -16,28 +16,36 @@ module Ecore
           raise TypeError.new('not a Ecore::Node given') unless val.is_a?(Ecore::Node)
           eval("val.remove_#{self.class.name.underscore}(self)")
         end
-        raise TypeError.new('not a Ecore::Node class given') unless class_eval(klass_name).new.is_a?(Ecore::Node)
+        raise TypeError.new('not a Ecore::Node class given') unless class_eval(name.to_s.classify).new.is_a?(Ecore::Node)
         __send__(:define_method, "#{plural}") do
           raise NotSavedYetError.new("node hasn't been saved yet") if new_record?
-          klass = eval(klass_name)
-          eval("#{klass}.find(@session, :#{self.class.name.underscore}_node_ids.contains => @id)")
+          if instance_variable_get("@#{plural}_cache").nil?
+            klass = eval(name.to_s.classify)
+            instance_variable_set("@#{plural}_cache", eval("#{klass}.find(@session, :#{self.class.name.underscore}_node_ids.contains => @id)"))
+          end
+          instance_variable_get("@#{plural}_cache")
         end
+        __send__(:define_method, "clear_#{plural}_cache") { instance_variable_set("@#{plural}_cache", nil) }
+        
       end
       
-      def labels(name)
+      def has_labels(name)
         __send__(:define_method, "#{name}_node_ids=") { |val| instance_variable_set("@#{name}_node_ids",val.to_s) }
         __send__(:define_method, "#{name}_node_ids") { instance_variable_get("@#{name}_node_ids") }
         __send__(:define_method, "add_#{name}") do |val|
           raise TypeError.new('not a Ecore::Node given') unless val.is_a?(Ecore::Node)
           add_label_to("#{name}_node_ids", val.id)
+          eval("val.clear_#{self.class.name.underscore.pluralize}_cache")
         end
         __send__(:define_method, "remove_#{name}") do |val|
           raise TypeError.new('not a Ecore::Node given') unless val.is_a?(Ecore::Node)
           remove_label_from("#{name}_node_ids", val.id)
+          eval("val.clear_#{self.class.name.underscore.pluralize}_cache")
         end
         self.attributes ||= []
         self.attributes << "#{name}_node_ids" unless self.attributes.include?("#{name}_node_ids")
       end
+      
       
     end
     

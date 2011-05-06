@@ -25,6 +25,18 @@ module Ecore
       new_order
     end
     
+    # looks up an attribute in the current array (mostly makes just
+    # sense, if cached.
+    # e.g.:
+    # nodes.find(:id => 'we236oi2')
+    def find(attrs)
+      res = self.inject(self.class.new) do |arr, node|
+        arr << node if attrs.has_key?(:id) and attrs[:id] == node.id
+        arr
+      end
+      (res.size == 1 && attrs.has_key?(:id)) ? res.first : res
+    end
+    
     def to_hash
       self.inject(Array.new) { |array, n| array << n.to_hash ; array }
     end
