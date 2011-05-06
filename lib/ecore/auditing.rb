@@ -16,13 +16,14 @@ module Ecore
         Ecore::log.info("Ecore::Auditing any repository changes to #{@@logfile}")
       end
       
-      def log(operation, node)
+      def log(operation, node,summary="")
         str = "#{DELIMITER}#{Time.now}"
         str << "#{DELIMITER}#{operation}"
         str << "#{DELIMITER}#{Time.now.to_f}"
         str << "#{DELIMITER}#{node.class.name}"
         str << "#{DELIMITER}#{node.name}"
         str << "#{DELIMITER}#{node.id}"
+        str << "#{DELIMITER}#{summary}"
         if node.updated_by and node.updater
           str << "#{DELIMITER}#{node.updater.name}"
           str << "#{DELIMITER}#{node.updated_by}" 
@@ -41,9 +42,10 @@ module Ecore
                         :time => Time.at(splitline[3].to_f), 
                         :class_name => splitline[4],
                         :name => splitline[5],
-                        :id => splitline[6]}
-            tmp_hash.merge!({ :user_name => splitline[7],
-                              :user_id => splitline[8]}) if splitline.size > 8
+                        :id => splitline[6],
+                        :summary => splitline[7]}
+            tmp_hash.merge!({ :user_name => splitline[8],
+                              :user_id => splitline[9]}) if splitline.size > 9
             arr << tmp_hash
           end
           arr

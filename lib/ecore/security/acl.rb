@@ -128,12 +128,19 @@ module Ecore
     # e.g.:
     # node.share( user, 'rw' )
     def share( user, privileges )
-      self.acl << { :user => user, :privileges => privileges } if user.is_a?(Ecore::User) or user.is_a?(Ecore::Group)
+      if (!Ecore::ENV[:sessions] or user.is_a?(Ecore::User) or user.is_a?(Ecore::Group)) and ( !Ecore::ENV[:sessions] or can_share?)
+        self.acl << { :user => user, :privileges => privileges } 
+        Ecore::Auditing.log("shared",self,"#{user.name} (#{user.class.name}) #{privileges}")
+      end
     end
     
     # removes user from current node acls
     def unshare( user )
-      self.acl.delete(user.id) if ( user.is_a?(Ecore::User) or user.is_a?(Ecore::Group) ) and acl.has_key?( user.id )
+      if (!Ecore::ENV[:sessions] or user.is_a?(Ecore::User) or user.is_a?(Ecore::Group)) and ( !Ecore::ENV[:sessions] or can_share?) and 
+            acl.has_key?( user.id )
+        self.acl.delete(user.id)
+        Ecore::Auditing.log("unshared",self)
+      end
     end
     
   end
