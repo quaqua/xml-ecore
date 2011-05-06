@@ -16,7 +16,6 @@ module Ecore
         doc = create_xml_node(doc) if new_record?
         Ecore::Mutex::request_lock(self.id) if new_record?
         doc.root << update_xml_node(doc.search("//nodes/node[@id='#{@id}']").first)
-        doc = assets.save_all(doc, :node_id => @id)
         write_xml_doc(doc)
         Ecore::Mutex::release(self.id)
         Ecore::Auditing::log((@new_record ? "created" : "saved"), self)

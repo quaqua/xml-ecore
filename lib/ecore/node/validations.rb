@@ -14,7 +14,7 @@ module Ecore
         self.validations ||= []
         case type
         when :presence || :required
-          self.validations << "(@#{name}.nil? or @#{name}.empty?) ? (@errors[:#{name}] = ['#{name} is required'] ; false) : true"
+          self.validations << "(@#{name}.nil? or (@#{name}.is_a?(String) && @#{name}.empty?)) ? (@errors[:#{name}] = ['#{name} is required'] ; false) : true"
         when :email_format
           self.validations << "(@#{name} && @#{name}.size > 0 && @#{name}.match(/^([^\s]+)((?:[-a-z0-9]\.)[a-z]{2,})$/i).nil?) ? (@errors[:#{name}] = ['#{name} is not a valid email address'] ; false) : true"
         end

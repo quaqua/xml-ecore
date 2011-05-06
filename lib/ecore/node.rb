@@ -145,14 +145,6 @@ module Ecore
       Ecore::Node.find( @session, :label_node_ids.contains => @id )
     end
     
-    # holds NodeAssets, which should be associated with this node
-    # returns NodeAssetArray in any case
-    def assets(attrs={:all => true})
-      return @assets if @assets and attrs == {:all => true}
-      @assets = Ecore::NodeAssetArray.find(attrs.merge(:xml_path => "//nodes/node[@id='#{@id}']/assets",
-                                                       :node_id => @id), deleted?)
-    end
-    
     # returns all predecessor primary_labels (as nodes) until on top
     def ancestors(labels=[])
       ancs = []
