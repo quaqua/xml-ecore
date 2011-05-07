@@ -50,6 +50,29 @@ You can update a node by well-rails-known update_attributes method:
   Ecore::Node.find(session, :id => params[:id]).update_attributes(params[:mytask])
   
 For more details, refer to the rdoc.
+
+==== Concept
+
+There are a couple of use cases, where you need not only a hierarchical tree 
+structure, but also a flexibility of relations between nodes of a tree, let's say
+a web page "Michael", a subpage of "Contacts" also should be shown up in "project members",
+a subpage of "projects". ecore deals with such use cases with it's label-concept.
+
+You can add a label to "Michael", the primary label is "contacts", another label is
+"project members". Label stands for the actual node, the current node should be labeled
+with.
+
+The classic hierarchical structure is still present through the primary_label method. It
+is the node's first label and has it's own setter/getter.
+
+To decrease the amount of xml-parsings per page call, there are several cachers which will hold
+subnodes, nodes and associated nodes.
+
+===== Nodes association
+
+You can associate nodes very similar to the relational mapper concept of ActiveRecord, via
+defining :has_labels and look them (and only nodes of that type) up.
+
   
 ==== What ecore can and what it can't
 

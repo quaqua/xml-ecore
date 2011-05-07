@@ -44,12 +44,12 @@ module Ecore
     extend Ecore::AtomXMLActions::ClassMethods
     include Ecore::AtomXMLActions::InstanceMethods
     
-    string      :name, :required => true
-    string      :created_by
-    string      :updated_by
-    time        :mtime
-    time        :ctime
-    string      :label_node_ids
+    string      :name, :required => true, :index => true
+    string      :created_by, :index => true
+    string      :updated_by, :index => true
+    time        :mtime, :index => true
+    time        :ctime, :index => true
+    string      :label_node_ids, :index => true
     
     before      :save, lambda{ self.mtime = Time.now ; self.updated_by = @session.user.id if @session and @session.is_a?(Ecore::Session) }
     before      :create, lambda{ self.ctime = Time.now ; self.created_by = @session.user.id if @session and @session.is_a?(Ecore::Session) }

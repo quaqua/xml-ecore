@@ -127,4 +127,14 @@ describe "Ecore::Node" do
     nodes.first.name.should == "test_status00"
   end
   
+  it "should find mulitple :ids and return them as nodearray" do
+    n1 = Ecore::Node.create(nil, :name => 'n1')
+    n2 = Ecore::Node.create(nil, :name => 'n2')
+    na = Ecore::Node.find(nil, :id => [n1.id,n2.id])
+    na.is_a?(Ecore::NodeArray).should == true
+    na.size.should == 2
+    na.first.name.should == 'n1'
+    na.last.name.should == 'n2'
+  end
+  
 end

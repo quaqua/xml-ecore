@@ -13,7 +13,7 @@ module Ecore
 
     module ClassMethods
 
-      attr_accessor :time_attributes, :hidden_class, :attributes
+      attr_accessor :time_attributes, :hidden_class, :attributes, :index_attributes
 
       # defines a string attribute
       # string :name, options
@@ -66,8 +66,13 @@ module Ecore
 
       def generate_attr(name, type, options)
         raise TypeError.new("options must be Hash not #{options.class}") unless options.is_a?(Hash)
-        self.attributes ||= []
-        self.attributes << name unless self.attributes.include?(name)
+        if options[:index]
+          self.index_attributes ||= []
+          self.index_attributes << name unless self.index_attributes.include?(name)
+        else
+          self.attributes ||= []
+          self.attributes << name unless self.attributes.include?(name)
+        end
         if options[:required]
           validates :presence, name
         end
@@ -136,7 +141,18 @@ module Ecore
         attrs_collector = []
         klass = self.class
         while klass.new.is_a?(Ecore::NodeAtom)
+          attrs_collector = klass.index_attributes + attrs_collector if klass.index_attributes
           attrs_collector = klass.attributes + attrs_collector if klass.attributes
+          klass = klass.superclass
+        end
+        attrs_collector
+      end
+      
+      def index_attrs
+        attrs_collector = []
+        klass = self.class
+        while klass.new.is_a?(Ecore::NodeAtom)
+          attrs_collector = klass.index_attributes + attrs_collector if klass.index_attributes
           klass = klass.superclass
         end
         attrs_collector

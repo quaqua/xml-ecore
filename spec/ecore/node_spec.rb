@@ -10,6 +10,16 @@ describe "Ecore::Node" do
     Ecore::Node.new(:name => "test").save(nil).should == true
   end
   
+  it "should create a nodes.xml file along with creating first node" do
+    Ecore::Node.create(nil, :name => "test")
+    ::File::exists?(Ecore::ENV[:repos_path]+'/nodes.xml')
+  end 
+  
+  it "should create a nodes/ directory in ecore_repos" do
+    Ecore::Node.create(nil, :name => "test")
+    ::File::directory?(Ecore::ENV[:repos_path]+'/nodes')
+  end
+  
   it "should return if node is a new_node (has been saved yet)" do
     node = Ecore::Node.new(:name => 'test')
     node.new_record?.should == true

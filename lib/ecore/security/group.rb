@@ -10,9 +10,6 @@ module Ecore
     # browser (ommits hidden objects by default)
     hidden true
     
-    string  :created_by
-    time    :created_at
-    
     def users
       Ecore::User.find_readonly(:group_ids.contains => @id)
     end

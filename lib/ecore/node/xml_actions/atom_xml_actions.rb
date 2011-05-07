@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'fileutils'
 require File::expand_path('../../mutex',__FILE__)
 
 module Ecore
@@ -40,6 +41,7 @@ module Ecore
         d.root = XML::Node.new('nodes',d)
         d.root['ecoreXMLVersion'] = Ecore::XML_NODE_VERSION
         ::File.open(filename, File::RDWR|File::CREAT, 0644) {|f| d.write_xml_to f }
+        FileUtils::mkdir_p(::File::join(filename.sub('.xml','')))
         Ecore::log.info("CREATED xml-repos file: '#{filename}' in #{Ecore::ENV[:repos_path]}")
         filename
       end
@@ -59,11 +61,16 @@ module Ecore
         end
       end
       
+      def get_fs_path(id)
+        ::File::join(repos_file.sub('.xml',''),id[0..1],id)
+      end
+      
       private
     
       def find_xml(session, attrs, trashed=nil)
+        return [attrs[:id]] if attrs.is_a?(Hash) and attrs.has_key?(:id) and attrs[:id].is_a?(String)
         doc = read_xml_doc((trashed ? trash_file : repos_file))
-        doc.search(format_xml_query(attrs))
+        doc.search(format_xml_query(attrs)).inject(Array.new){ |arr,xn| arr << xn.attributes['id'].to_s }
       end
       
       def format_xml_query(attrs,str="//nodes/node")
@@ -113,9 +120,22 @@ module Ecore
       end
       
       def init_from_xml(session, xml_node, trashed=:false)
-        attrs = xml_node.attributes.keys.inject(Hash.new) { |hash, key| hash[key.to_sym] = xml_node[key] ; hash }
+        attrs = {:id => xml_node.attributes['id'].value, :session => session}
+        xml_node.children.each do |child|
+          next if child.name.empty?
+          attrs[child.name.to_sym] = child.content
+        end
         attrs.merge!(:trashed => true) if trashed == :trashed
-        eval("#{xml_node.attributes['class_name']}.new(attrs.merge(:session => session, :id => '#{xml_node.attributes['id']}'))")
+        eval("#{xml_node.attributes['class_name']}.new(attrs)")
+      end
+         
+      def read_xml_node_from_fs(id)
+        filename = get_fs_path(id) + "/" + id + ".xml"
+        doc = nil
+        ::File::open(filename, File::RDONLY, 0644) do |f| 
+          doc = XML::parse f
+        end
+        doc.root
       end
         
     end
@@ -145,7 +165,7 @@ module Ecore
       end
       
       def create_unique_id(doc, xml_path="//nodes/node[@id='#{@id}']")
-        generate_id
+        return generate_id
         while doc.root.xpath(xml_path).size > 0
           generate_id
         end
@@ -157,7 +177,7 @@ module Ecore
       
       def update_xml_node(xml_node)
         raise NodeDisapearedError.new("couldn't find node with id #{@id} any more. lost") if xml_node.nil?
-        to_hash.each_pair do |k,v|
+        to_index_hash.each_pair do |k,v|
           xml_node[k.to_s] = (v.is_a?(Time) ? v = v.to_f : v).to_s
         end
         xml_node
@@ -165,6 +185,15 @@ module Ecore
           
       def to_hash
         hash = all_attrs.inject(Hash.new) { |hash, attribute| hash[attribute] = instance_variable_get("@#{attribute}") ; hash }
+        if @acl
+          hash.merge(:acl => @acl.keys.inject(String.new){ |str, key| str << "#{key}:#{@acl[key].privileges}," ; str })
+        else
+          hash
+        end
+      end
+      
+      def to_index_hash
+        hash = index_attrs.inject(Hash.new) { |hash, attribute| hash[attribute] = instance_variable_get("@#{attribute}") ; hash }
         if @acl
           hash.merge(:acl => @acl.keys.inject(String.new){ |str, key| str << "#{key}:#{@acl[key].privileges}," ; str })
         else
@@ -184,6 +213,29 @@ module Ecore
         acl.split(',').map do |ace_str| 
           @acl << Ace.new(:user_id => ace_str.split(':')[0], :privileges => ace_str.split(':')[1])
         end
+      end
+      
+      private
+      
+      def write_to_fs
+        node_path = self.class.get_fs_path(@id)
+        ::FileUtils::mkdir_p( node_path )
+        filename = node_path + "/" + @id + ".xml"
+        d = XML::Document.new
+        d.encoding = 'UTF-8'
+        d.root = XML::Node.new('node',d)
+        d.root['ecoreXMLVersion'] = Ecore::XML_NODE_VERSION
+        d.root['id'] = @id
+        d.root['class_name'] = self.class.name
+        to_hash.each_pair { |k,v| xmln = XML::Node.new(k.to_s,d) ; xmln.content = v ; d.root << xmln }
+        ::File.open(filename, File::RDWR|File::CREAT, 0644) {|f| d.write_xml_to f }
+        Ecore::log.debug("Written node to #{filename}")
+      end
+      
+      def delete_from_fs
+        node_path = self.class.get_fs_path(@id)
+        ::FileUtils::rm_rf( node_path )
+        ::FileUtils::rm_rf( ::File::dirname(node_path) ) if Dir.glob(node_path).size < 2
       end
    
     end

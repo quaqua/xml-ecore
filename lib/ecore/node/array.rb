@@ -30,8 +30,17 @@ module Ecore
     # e.g.:
     # nodes.find(:id => 'we236oi2')
     def find(attrs)
+      Ecore::log.info("NodeArray Cache looking up: #{attrs.inspect}")
       res = self.inject(self.class.new) do |arr, node|
-        arr << node if attrs.has_key?(:id) and attrs[:id] == node.id
+        hits = false
+        attrs.each_pair do |k,v|
+          if node.respond_to?(k) and eval("node.#{k}") == v
+            hits = true
+          else
+            hits = false
+          end
+        end
+        arr << node if hits
         arr
       end
       (res.size == 1 && attrs.has_key?(:id)) ? res.first : res

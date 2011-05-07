@@ -31,11 +31,11 @@ end
 
 task :stresstest do
   require File::expand_path("../lib/ecore",__FILE__)
-  require 'fileutils'
-  FileUtils::rm_rf('repos')
+  #require 'fileutils'
+  #FileUtils::rm_rf('repos')
   init_time = Time.now
-  n = 5000
-  Ecore::Repository.new :sessions => false
+  n = 10000
+  Ecore::Repository.new :repos_path => 'repos', :sessions => false, :loglevel => :warn
   (1..n).each do |i|
     Ecore::Node.create(nil, :name => "test#{i}")
   end
@@ -46,6 +46,17 @@ task :stresstest do
   init_time = Time.now
   nodes = Ecore::Node.find(nil, :name => "test#{n}")
   puts "lookded up #{n} nodes and found node.name='test#{n}' in #{Time.now - init_time} seconds"
+end
+
+task :stressread do
+  require File::expand_path("../lib/ecore",__FILE__)
+  Ecore::Repository.new :repos_path => 'repos', :sessions => false
+  init_time = Time.now
+  nodes = Ecore::Node.find(nil, :name => "test9500")
+  puts "found node.name='test9500' in #{Time.now - init_time} seconds"
+  init_time = Time.now
+  node = Ecore::Node.find(nil, :id => nodes.first.id)
+  puts "found node with id = #{node.id} in #{Time.now - init_time} seconds"
 end
 
 task :default => :spec

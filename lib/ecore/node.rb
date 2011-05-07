@@ -70,8 +70,8 @@ module Ecore
             end
           end
         end
-        nodes = find_xml(session, attrs, trashed==:trashed).inject(Ecore::NodeArray.new) do |arr, xml_node| 
-          n = init_from_xml(session, xml_node, trashed)
+        nodes = find_xml(session, attrs, trashed==:trashed).inject(Ecore::NodeArray.new) do |arr, node_id|
+          n = init_from_xml(session, read_xml_node_from_fs(node_id), trashed)
           arr << n if read_only or n.can_read?
           arr
         end
@@ -80,7 +80,7 @@ module Ecore
           @@cache[attrs[:id]] = nodes.first
           Ecore::log.debug("added node #{nodes.first.name} to CACHE size: #{@@cache.size}")
         end
-        return nodes.first if attrs.is_a?(Hash) and attrs[:id]
+        return nodes.first if attrs.is_a?(Hash) and attrs[:id] and nodes.size < 2
         nodes
       end
       
@@ -122,8 +122,9 @@ module Ecore
     end
     
     # returns all nodes, labeld with this node
-    def subnodes
-      Ecore::Node.find( @session, :label_node_ids.contains => @id )
+    def subnodes(reload=:false)
+      return @subnodes_cache if @subnodes_cache and reload != :reload
+      @subnodes_cache = Ecore::Node.find( @session, :label_node_ids.contains => @id )
     end
     
     # returns all predecessor primary_labels (as nodes) until on top

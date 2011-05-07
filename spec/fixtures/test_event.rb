@@ -1,8 +1,8 @@
 class TestEvent < Ecore::Node
   string    :title
-  time      :starts_at
-  time      :ends_at
-  integer   :status
+  time      :starts_at, :index => true
+  time      :ends_at, :index => true
+  integer   :status, :index => true
 end
 
 def test_event_fixtures

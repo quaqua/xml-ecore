@@ -12,7 +12,7 @@ describe "Ecore::Node hierarchy" do
     sub = Ecore::Node.create(nil, :name => "sub of main")
     sub.add_label(main)
     sub.save
-    main.subnodes.size.should == 1
+    main.subnodes(:reload).size.should == 1
   end
   
   it "should add subnodes b,c to a" do
@@ -23,7 +23,7 @@ describe "Ecore::Node hierarchy" do
     b.save
     c.add_label(a)
     c.save
-    a.subnodes.size.should == 2
+    a.subnodes(:reload).size.should == 2
   end
   
   it "should create a a->b->c hierarchy relation" do
@@ -37,8 +37,8 @@ describe "Ecore::Node hierarchy" do
     c.save
     c.labels.first.id.should == b.id
     b.labels.first.id.should == a.id
-    a.subnodes.first.id.should == b.id
-    b.subnodes.first.id.should == c.id
+    a.subnodes(:reload).first.id.should == b.id
+    b.subnodes(:reload).first.id.should == c.id
   end
   
   it "should return all node's ancestors" do

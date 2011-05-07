@@ -17,6 +17,7 @@ module Ecore
         Ecore::Mutex::request_lock(self.id) if new_record?
         doc.root << update_xml_node(doc.search("//nodes/node[@id='#{@id}']").first)
         write_xml_doc(doc)
+        write_to_fs
         Ecore::Mutex::release(self.id)
         Ecore::Auditing::log((@new_record ? "created" : "saved"), self)
         @new_record, @persisted = false, true
@@ -27,7 +28,10 @@ module Ecore
         doc = read_xml_doc
         trashed_node = doc.search("//nodes/node[@id='#{@id}']").remove.first
         write_xml_doc(doc)
-        return true if permanently
+        if permanently
+          delete_from_fs
+          return true
+        end
         trashed_doc = read_xml_doc(self.class.trash_file)
         trashed_doc.xpath("//nodes").first << trashed_node
         write_xml_doc(trashed_doc,self.class.trash_file)

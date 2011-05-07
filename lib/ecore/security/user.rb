@@ -41,15 +41,12 @@ module Ecore
     attr_accessor :id
     attr_accessor :send_confirmation
     
-    string  :email
+    string  :email, :index => true
     string  :fullname
     
-    string  :role
-    string  :group_ids
+    string  :role, :index => true
+    string  :group_ids, :index => true
 
-    string  :created_by
-    time    :created_at
-    
     string  :last_login_ip
     time    :last_login_at
     
@@ -59,11 +56,11 @@ module Ecore
     # used for first login ( if admin doesn't set password,
     # respectively if default user has invited/shared-content-with
     # other user
-    string  :confirmation_key
+    string  :confirmation_key, :index => true
     
-    boolean :suspended
-    string  :hashed_password
-    string  :forgot_password_key
+    boolean :suspended, :index => true
+    string  :hashed_password, :index => true
+    string  :forgot_password_key, :index => true
     
     string  :avatar
     

@@ -1,9 +1,13 @@
-2011-05-06 - Version 0.3.9
+2011-05-07 - Version 0.3.9
   - Ecore::Auditing added. any node operation will be logged now
   - Ecore::Assets deprecated
   - Labels extended. This brings a major performance improvement.
     define in class Worker "has_labels :company" and in class Company "scope :worker" to cross-link a relational mapping like in ActiveRecord
     This gives you worker.add_company( company ) and company.workers.find(:id => worker.id), which will perform a cached lookup.
+  - can find :id => [id1,id2,id3,...] now
+  - nodes are now stored in the filesystem, so an :id search will directly lead to the node, omitting parsing the xml file
+    this feature is not backward compatible with previous versions
+  - mark node attributes with :index => true to make them queryable
 
 2011-05-03 - Version 0.3.8
   - NodeAsset bugfixed: not saving asset everytime a node is saved, if asset is unchanged. That caused assets
