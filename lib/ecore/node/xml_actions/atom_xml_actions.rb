@@ -165,8 +165,8 @@ module Ecore
       end
       
       def create_unique_id(doc, xml_path="//nodes/node[@id='#{@id}']")
-        return generate_id
-        while doc.root.xpath(xml_path).size > 0
+        generate_id
+        while ::File::exists?(self.class.get_fs_path(@id))
           generate_id
         end
       end
