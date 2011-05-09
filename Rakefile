@@ -34,9 +34,9 @@ task :stresstest do
   #require 'fileutils'
   #FileUtils::rm_rf('repos')
   init_time = Time.now
-  n = 100
+  n = 10000
   Ecore::Repository.new :repos_path => 'repos', :sessions => false, :loglevel => :warn
-  (1200..n).each do |i|
+  (1..n).each do |i|
     Ecore::Node.create(nil, :name => '"test"\" woeitweituo \"#{i}')
   end
   puts "created #{n} nodes in #{Time.now - init_time} seconds"

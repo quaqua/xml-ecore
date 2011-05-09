@@ -10,9 +10,9 @@ ecore can be used just like ActiveRecord::Base
 example:
 
   MyTask < Ecore::Node
-    string  :name, :required => true # the name attribute is already defined in Ecore::Node
+    string  :name, :index => true, :required => true # the name attribute is already defined in Ecore::Node
     string  :note, :required => true
-    boolean :status
+    boolean :status, :index => true
     
     before :create, lambda{ status = 'open' }
     after :save, :do_something_else
