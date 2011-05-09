@@ -32,10 +32,10 @@ module Ecore
     def find(attrs)
       Ecore::log.info("NodeArray Cache looking up: #{attrs.inspect}")
       res = self.inject(self.class.new) do |arr, node|
-        hits = false
+        hits = nil
         attrs.each_pair do |k,v|
           if node.respond_to?(k) and eval("node.#{k}") == v
-            hits = true
+            hits = true if hits.nil?
           else
             hits = false
           end
